@@ -1,0 +1,455 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Library Management System</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        header {
+            background: #173b57;
+            color: white;
+            padding: 25px 5%;
+        }
+
+        header h1 {
+            margin: 0 0 8px;
+        }
+
+        nav {
+            background: #102c43;
+            padding: 14px 5%;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-right: 22px;
+        }
+
+        nav a:hover {
+            color: #7dd3fc;
+        }
+
+        main {
+            max-width: 1150px;
+            margin: 25px auto;
+            padding: 0 16px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .card, .stat {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px #0000000b;
+            margin-bottom: 18px;
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 28px;
+            color: #176b87;
+        }
+
+        h2 {
+            color: #173b57;
+            margin-top: 0;
+        }
+
+        input, button {
+            font: inherit;
+            padding: 11px;
+            margin: 6px 0;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+        }
+
+        input {
+            width: 100%;
+        }
+
+        button {
+            background: #176b87;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #104e68;
+        }
+
+        .search {
+            margin-bottom: 16px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+
+        th {
+            background: #e8f1f6;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+
+        .available {
+            color: #15803d;
+        }
+
+        .borrowed {
+            color: #b45309;
+        }
+
+        .message {
+            padding: 12px;
+            margin-bottom: 16px;
+            border-radius: 6px;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        footer {
+            text-align: center;
+            background: #102c43;
+            color: white;
+            padding: 18px;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 650px) {
+            .stats, .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            nav a {
+                display: inline-block;
+                margin: 5px 12px 5px 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<header id="home">
+    <h1>📚 Library Management System</h1>
+    <p>Manage books easily with our college library portal.</p>
+</header>
+
+<nav>
+    <a href="#home">Home</a>
+    <a href="#books">Book Catalogue</a>
+    <a href="#add">Add Book</a>
+    <a href="#operations">Borrow / Return</a>
+</nav>
+
+<main>
+    <div id="notice" aria-live="polite"></div>
+
+    <section class="stats">
+        <div class="stat">
+            <span>Total Titles</span>
+            <strong id="total">0</strong>
+        </div>
+
+        <div class="stat">
+            <span>Available Books</span>
+            <strong id="available">0</strong>
+        </div>
+
+        <div class="stat">
+            <span>Borrowed Books</span>
+            <strong id="borrowed">0</strong>
+        </div>
+    </section>
+
+    <section class="card" id="books">
+        <h2>Book Catalogue</h2>
+
+        <input
+            class="search"
+            id="search"
+            type="search"
+            placeholder="Search by book ID, title, author or borrower..."
+            aria-label="Search books">
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Book ID</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Status</th>
+                    <th>Borrower</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+
+                <tbody id="bookRows">
+                <tr>
+                    <td colspan="6">Loading books...</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="card" id="add">
+        <h2>Add a New Book</h2>
+
+        <form action="/action" method="get">
+            <input type="hidden" name="op" value="add">
+
+            <div class="form-grid">
+                <div>
+                    <label for="title">Book Title</label>
+                    <input id="title" name="title"
+                           maxlength="100" required
+                           placeholder="Enter book title">
+                </div>
+
+                <div>
+                    <label for="author">Author Name</label>
+                    <input id="author" name="author"
+                           maxlength="80" required
+                           placeholder="Enter author name">
+                </div>
+            </div>
+
+            <button type="submit">Add Book</button>
+        </form>
+    </section>
+
+    <section class="card" id="operations">
+        <h2>Borrow a Book</h2>
+
+        <form action="/action" method="get">
+            <input type="hidden" name="op" value="borrow">
+
+            <label for="borrowId">Book ID</label>
+            <input id="borrowId" type="number" name="id"
+                   min="1" required placeholder="Enter book ID">
+
+            <label for="studentName">Student Name</label>
+            <input id="studentName" type="text" name="studentName"
+                   maxlength="80" required
+                   placeholder="Enter your full name">
+
+            <label for="studentId">Student ID Number</label>
+            <input id="studentId" type="text" name="studentId"
+                   maxlength="30" required
+                   placeholder="Enter your college ID">
+
+            <button type="submit">Borrow Book</button>
+        </form>
+
+        <hr>
+
+        <h2>Return a Book</h2>
+
+        <form action="/action" method="get">
+            <label for="returnId">Book ID</label>
+            <input id="returnId" type="number" name="id"
+                   min="1" required placeholder="Enter book ID">
+
+            <button type="submit" name="op" value="return">
+                Return Book
+            </button>
+        </form>
+    </section>
+</main>
+
+<footer>
+    <p>Library Management System | College Group Project</p>
+</footer>
+
+<script>
+    let books = [];
+
+    async function loadBooks() {
+        const response = await fetch("/books");
+
+        if (!response.ok) {
+            throw new Error("Could not load books.");
+        }
+
+        books = await response.json();
+        renderBooks();
+    }
+
+    function renderBooks() {
+        const term = document.getElementById("search")
+            .value.trim().toLowerCase();
+
+        const visibleBooks = books.filter(book =>
+            String(book.id).includes(term) ||
+            book.title.toLowerCase().includes(term) ||
+            book.author.toLowerCase().includes(term) ||
+            book.borrowerName.toLowerCase().includes(term) ||
+            book.borrowerId.toLowerCase().includes(term)
+        );
+
+        const rows = document.getElementById("bookRows");
+        rows.replaceChildren();
+
+        if (visibleBooks.length === 0) {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+
+            cell.colSpan = 6;
+            cell.textContent = "No books found.";
+            row.appendChild(cell);
+            rows.appendChild(row);
+        } else {
+            visibleBooks.forEach(book => {
+                const row = document.createElement("tr");
+
+                const values = [
+                    book.id,
+                    book.title,
+                    book.author,
+                    book.available ? "Available" : "Borrowed",
+                    book.available
+                        ? "-"
+                        : book.borrowerName + " (ID: " +
+                          book.borrowerId + ")"
+                ];
+
+                values.forEach((value, index) => {
+                    const cell = document.createElement("td");
+                    cell.textContent = value;
+
+                    if (index === 3) {
+                        cell.className = "status " +
+                            (book.available ? "available" : "borrowed");
+                    }
+
+                    row.appendChild(cell);
+                });
+
+                const actionCell = document.createElement("td");
+                const form = document.createElement("form");
+
+                form.action = "/action";
+                form.method = "get";
+
+                const idInput = document.createElement("input");
+                idInput.type = "hidden";
+                idInput.name = "id";
+                idInput.value = book.id;
+
+                const opInput = document.createElement("input");
+                opInput.type = "hidden";
+                opInput.name = "op";
+                opInput.value = book.available ? "borrow" : "return";
+
+                const button = document.createElement("button");
+                button.type = "button";
+                button.textContent = book.available ? "Borrow" : "Return";
+
+                button.addEventListener("click", () => {
+                    if (book.available) {
+                        document.getElementById("borrowId").value = book.id;
+                        document.getElementById("operations").scrollIntoView({
+                            behavior: "smooth"
+                        });
+                        document.getElementById("studentName").focus();
+                    } else {
+                        form.submit();
+                    }
+                });
+
+                form.append(idInput, opInput, button);
+                actionCell.appendChild(form);
+                row.appendChild(actionCell);
+                rows.appendChild(row);
+            });
+        }
+
+        document.getElementById("total").textContent = books.length;
+        document.getElementById("available").textContent =
+            books.filter(book => book.available).length;
+        document.getElementById("borrowed").textContent =
+            books.filter(book => !book.available).length;
+    }
+
+    function showNotice() {
+        const params = new URLSearchParams(window.location.search);
+        const message = params.get("message");
+
+        if (message) {
+            const notice = document.getElementById("notice");
+            notice.textContent = message;
+            notice.className = "message";
+
+            if (params.get("success") === "false") {
+                notice.classList.add("error");
+            }
+
+            history.replaceState(null, "", window.location.pathname);
+        }
+    }
+
+    document.getElementById("search")
+        .addEventListener("input", renderBooks);
+
+    showNotice();
+
+    loadBooks().catch(() => {
+        const cell = document.createElement("td");
+        const row = document.createElement("tr");
+
+        cell.colSpan = 6;
+        cell.textContent =
+            "Unable to load books. Check that the Java server is running.";
+        row.appendChild(cell);
+
+        document.getElementById("bookRows").replaceChildren(row);
+    });
+</script>
+</body>
+</html>
